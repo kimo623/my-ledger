@@ -72,7 +72,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
+    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } 
       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot } 
       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -94,6 +94,10 @@
     let currentUser = null;
     let unsubscribeSnapshot = null;
 
+    getRedirectResult(auth).catch((err) => {
+      if (err.message) alert("登入驗證失敗: " + err.message);
+    });
+
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       if (user) {
@@ -110,9 +114,12 @@
 
     document.getElementById("loginBtn").addEventListener("click", async () => {
       try {
-        await signInWithPopup(auth, provider);
+        const btn = document.getElementById("loginBtn");
+        btn.textContent = "轉跳登入中...";
+        btn.disabled = true;
+        await signInWithRedirect(auth, provider);
       } catch (err) {
-        alert("登入失敗: " + err.message);
+        alert("無法啟動登入: " + err.message);
       }
     });
 
@@ -161,11 +168,4 @@
         return;
       }
 
-      const submitBtn = document.getElementById("submitBtn");
-      submitBtn.disabled = true;
-      submitBtn.textContent = "儲存中...";
-
-      try {
-        await addDoc(collection(db, "users", currentUser.uid, "records"), {
-          type: document.getElementById("type").value,
-       
+      const submitBtn = d
