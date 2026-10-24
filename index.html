@@ -11,17 +11,21 @@
     .hidden { display: none !important; }
     label { font-size: 13px; color: #666; margin-top: 8px; display: block; }
     input, select, button { width: 100%; padding: 12px; margin: 6px 0 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-    input:focus, select:focus { border-color: #007bff; outline: none; }
     button.primary { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; padding: 14px; margin-top: 10px; }
-    button.primary:active { background: #0056b3; }
     button.google-btn { background: #fff; border: 1px solid #ccc; color: #333; font-weight: bold; cursor: pointer; padding: 14px; }
     .record-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-    .record-item:last-child { border-bottom: none; }
     .expense { color: #dc3545; font-weight: bold; font-size: 17px; }
     .income { color: #28a745; font-weight: bold; font-size: 17px; }
     .user-bar { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-bottom: 12px; }
     .user-bar button { width: auto; padding: 4px 12px; margin: 0; font-size: 12px; border: 1px solid #ccc; background: #fff; border-radius: 6px; }
+    #debugBox { font-size: 12px; color: #d9534f; background: #fff3f3; padding: 10px; border-radius: 8px; margin-top: 15px; word-break: break-all; }
   </style>
+  <script>
+    // 捕獲所有 JavaScript 載入與語法錯誤並直接彈窗
+    window.onerror = function(msg, url, line) {
+      alert("程式載入出錯：\n" + msg + "\n行號：" + line);
+    };
+  </script>
 </head>
 <body>
 
@@ -29,6 +33,7 @@
     <h2>雲端記帳本</h2>
     <p style="color:#666; font-size:14px; margin-bottom: 24px;">使用 Google 帳號登入<br>所有手機資料即時同步</p>
     <button id="loginBtn" class="google-btn">使用 Google 帳號登入</button>
+    <div id="debugBox">狀態：正在準備登入組件...</div>
   </div>
 
   <div id="mainSection" class="hidden">
@@ -59,7 +64,7 @@
       </select>
 
       <label>備註說明</label>
-      <input type="text" id="note" placeholder="例如：午餐便當、機車加油 (選填)">
+      <input type="text" id="note" placeholder="例如：午餐便當 (選填)">
 
       <button id="submitBtn" class="primary">儲存紀錄</button>
     </div>
@@ -71,101 +76,146 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } 
-      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot } 
-      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    function setDebug(text) {
+      const box = document.getElementById("debugBox");
+      if (box) box.innerText = text;
+    }
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZ6Vt2WmGHsQX-WHaQAr-KId2-ra2zXfo",
-      authDomain: "my-ledger-2026-25b34.firebaseapp.com",
-      projectId: "my-ledger-2026-25b34",
-      storageBucket: "my-ledger-2026-25b34.firebasestorage.app",
-      messagingSenderId: "306333474464",
-      appId: "1:306333474464:web:afd783bf4d255f981c33c5"
-    };
+    try {
+      setDebug("正在載入 Firebase SDK...");
+      const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+      const { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } 
+        = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+      const { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot } 
+        = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+      setDebug("正在連接 Firebase...");
+      const firebaseConfig = {
+        apiKey: "AIzaSyCZ6Vt2WmGHsQX-WHaQAr-KId2-ra2zXfo",
+        authDomain: "my-ledger-2026-25b34.firebaseapp.com",
+        projectId: "my-ledger-2026-25b34",
+        storageBucket: "my-ledger-2026-25b34.firebasestorage.app",
+        messagingSenderId: "306333474464",
+        appId: "1:306333474464:web:afd783bf4d255f981c33c5"
+      };
 
-    let currentUser = null;
-    let unsubscribeSnapshot = null;
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const provider = new GoogleAuthProvider();
 
-    getRedirectResult(auth).catch((err) => {
-      if (err.message) alert("登入驗證失敗: " + err.message);
-    });
+      setDebug("模組載入完畢，等待登入操作。");
 
-    onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-      if (user) {
-        document.getElementById("authSection").classList.add("hidden");
-        document.getElementById("mainSection").classList.remove("hidden");
-        document.getElementById("userEmail").textContent = user.email;
-        bindRecords(user.uid);
-      } else {
-        document.getElementById("authSection").classList.remove("hidden");
-        document.getElementById("mainSection").classList.add("hidden");
-        if (unsubscribeSnapshot) unsubscribeSnapshot();
+      getRedirectResult(auth).catch((err) => {
+        if (err && err.message) {
+          alert("登入轉跳錯誤: " + err.message);
+          setDebug("錯誤: " + err.message);
+        }
+      });
+
+      let currentUser = null;
+      let unsubscribeSnapshot = null;
+
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) {
+          document.getElementById("authSection").classList.add("hidden");
+          document.getElementById("mainSection").classList.remove("hidden");
+          document.getElementById("userEmail").textContent = user.email;
+          bindRecords(user.uid);
+        } else {
+          document.getElementById("authSection").classList.remove("hidden");
+          document.getElementById("mainSection").classList.add("hidden");
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          setDebug("未登入，請點擊上方按鈕。");
+        }
+      });
+
+      const loginBtn = document.getElementById("loginBtn");
+      loginBtn.addEventListener("click", async () => {
+        try {
+          loginBtn.textContent = "轉跳登入中...";
+          setDebug("正在發起 Google 登入...");
+          await signInWithRedirect(auth, provider);
+        } catch (err) {
+          alert("發起登入失敗: " + err.message);
+          setDebug("登入失敗: " + err.message);
+          loginBtn.textContent = "使用 Google 帳號登入";
+        }
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+
+      function bindRecords(uid) {
+        const q = query(
+          collection(db, "users", uid, "records"),
+          orderBy("timestamp", "desc"),
+          limit(15)
+        );
+
+        unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+          const listDiv = document.getElementById("recordList");
+          if (snapshot.empty) {
+            listDiv.innerHTML = "<p style='color:#999; text-align:center;'>尚無任何紀錄</p>";
+            return;
+          }
+
+          listDiv.innerHTML = "";
+          snapshot.forEach((doc) => {
+            const item = doc.data();
+            const div = document.createElement("div");
+            div.className = "record-item";
+            const dateStr = new Date(item.timestamp).toLocaleString([], { month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' });
+            div.innerHTML = `
+              <div>
+                <div style="font-size:15px;"><strong>[${item.category}]</strong>${item.note || '無備註'}</div>
+                <small style="color:#888;">${dateStr}</small>
+              </div>
+              <span class="${item.type}">${item.type === 'expense' ? '-' : '+'}$${item.amount}</span>
+            `;
+            listDiv.appendChild(div);
+          });
+        });
       }
-    });
 
-    document.getElementById("loginBtn").addEventListener("click", async () => {
-      try {
-        const btn = document.getElementById("loginBtn");
-        btn.textContent = "轉跳登入中...";
-        btn.disabled = true;
-        await signInWithRedirect(auth, provider);
-      } catch (err) {
-        alert("無法啟動登入: " + err.message);
-      }
-    });
+      document.getElementById("submitBtn").addEventListener("click", async () => {
+        if (!currentUser) return;
+        const amountInput = document.getElementById("amount");
+        const noteInput = document.getElementById("note");
+        const amountVal = Number(amountInput.value);
 
-    document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
-
-    function bindRecords(uid) {
-      const q = query(
-        collection(db, "users", uid, "records"),
-        orderBy("timestamp", "desc"),
-        limit(15)
-      );
-
-      unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-        const listDiv = document.getElementById("recordList");
-        if (snapshot.empty) {
-          listDiv.innerHTML = "<p style='color:#999; text-align:center;'>尚無任何紀錄</p>";
+        if (!amountVal || amountVal <= 0) {
+          alert("請輸入正確金額");
           return;
         }
 
-        listDiv.innerHTML = "";
-        snapshot.forEach((doc) => {
-          const item = doc.data();
-          const div = document.createElement("div");
-          div.className = "record-item";
-          const dateStr = new Date(item.timestamp).toLocaleString([], { month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' });
-          div.innerHTML = `
-            <div>
-              <div style="font-size:15px;"><strong>[${item.category}]</strong> ${item.note || '無備註'}</div>
-              <small style="color:#888;">${dateStr}</small>
-            </div>
-            <span class="${item.type}">${item.type === 'expense' ? '-' : '+'}$${item.amount}</span>
-          `;
-          listDiv.appendChild(div);
-        });
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "儲存中...";
+
+        try {
+          await addDoc(collection(db, "users", currentUser.uid, "records"), {
+            type: document.getElementById("type").value,
+            amount: amountVal,
+            category: document.getElementById("category").value,
+            note: noteInput.value.trim(),
+            timestamp: Date.now()
+          });
+
+          amountInput.value = "";
+          noteInput.value = "";
+        } catch (err) {
+          alert("儲存失敗: " + err.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "儲存紀錄";
+        }
       });
+
+    } catch (rootErr) {
+      alert("初始化腳本失敗: " + rootErr.message);
+      setDebug("根錯誤: " + rootErr.message);
     }
-
-    document.getElementById("submitBtn").addEventListener("click", async () => {
-      if (!currentUser) return;
-      const amountInput = document.getElementById("amount");
-      const noteInput = document.getElementById("note");
-      const amountVal = Number(amountInput.value);
-
-      if (!amountVal || amountVal <= 0) {
-        alert("請輸入正確金額");
-        return;
-      }
-
-      const submitBtn = d
+  </script>
+</body>
+</html>
