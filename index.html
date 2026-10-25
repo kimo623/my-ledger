@@ -56,25 +56,17 @@
     #statusNotice { font-size: 12px; color: #333; background: #fff9c4; padding: 6px 12px; text-align: center; }
   </style>
 
-  <!-- 引入手機除錯面板 -->
   <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-  <script>
-    window.vConsole = new window.VConsole();
-  </script>
-
-  <!-- Firebase 相容版 SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script>window.vConsole = new window.VConsole();</script>
 </head>
 <body>
 
-  <div id="statusNotice">系統載入中...</div>
+  <div id="statusNotice">介面已就緒，雲端服務連線中...</div>
 
   <div class="top-header">
     <h2 id="headerTitle">正在用的帳本</h2>
     <div id="authContainer">
-      <button class="login-btn-top" id="topLoginBtn" type="button" onclick="triggerLogin()">點此登入 Google</button>
+      <button class="login-btn-top" id="topLoginBtn" type="button" onclick="handleLoginClick()">點此登入 Google</button>
     </div>
   </div>
 
@@ -91,7 +83,7 @@
 
     <div class="section-card">
       <div class="section-title">最新流水明細</div>
-      <div id="transactionList" style="color:#888; font-size:14px; text-align:center; padding:15px 0;">尚無紀錄，請先登入或記一筆</div>
+      <div id="transactionList" style="color:#888; font-size:14px; text-align:center; padding:15px 0;">尚無紀錄，點下方 ＋ 即可記帳</div>
     </div>
   </div>
 
@@ -127,4 +119,16 @@
       <span>流水</span>
     </button>
     <button class="fab-btn" id="fabAddBtn" type="button" onclick="openRecordModal()">＋</button>
-    <button class="nav-btn" id="tabAccBtn" type="button" onclick="switchNav('acco
+    <button class="nav-btn" id="tabAccBtn" type="button" onclick="switchNav('accounts')">
+      <span class="icon">💳</span>
+      <span>帳戶</span>
+    </button>
+  </div>
+
+  <!-- 記帳彈窗 -->
+  <div class="modal-overlay" id="recordModal">
+    <div class="modal-sheet">
+      <h3 style="margin-bottom:15px;">記一筆帳</h3>
+      <div class="form-group">
+        <label>收支類型</label>
+        <select id="recType" clas
