@@ -65,3 +65,66 @@
   <!-- Firebase 相容版 SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <div id="statusNotice">系統載入中...</div>
+
+  <div class="top-header">
+    <h2 id="headerTitle">正在用的帳本</h2>
+    <div id="authContainer">
+      <button class="login-btn-top" id="topLoginBtn" type="button" onclick="triggerLogin()">點此登入 Google</button>
+    </div>
+  </div>
+
+  <!-- 1. 首頁：流水 -->
+  <div id="viewHome" class="view-container active">
+    <div class="stat-banner">
+      <div class="label">本月淨資產變動</div>
+      <div class="main-num" id="totalNetBalance">$0.00</div>
+      <div class="sub-row">
+        <span>總收入：<b id="monthlyIncome">$0</b></span>
+        <span>總支出：<b id="monthlyExpense">$0</b></span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">最新流水明細</div>
+      <div id="transactionList" style="color:#888; font-size:14px; text-align:center; padding:15px 0;">尚無紀錄，請先登入或記一筆</div>
+    </div>
+  </div>
+
+  <!-- 2. 帳戶：主子帳戶結構 -->
+  <div id="viewAccounts" class="view-container">
+    <div class="stat-banner" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #14532d;">
+      <div class="label">帳戶總資產</div>
+      <div class="main-num" id="accountTotalSum">$0.00</div>
+      <div style="font-size:12px; opacity:0.85;">包含現金及各銀行子帳戶合計</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">
+        <span>現金帳戶</span>
+        <span id="cashGroupTotal">$0.00</span>
+      </div>
+      <div id="cashAccountList"></div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">
+        <span>儲蓄帳戶</span>
+        <span id="bankGroupTotal">$0.00</span>
+      </div>
+      <div id="bankAccountList"></div>
+    </div>
+  </div>
+
+  <!-- 底部導覽列 -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="tabHomeBtn" type="button" onclick="switchNav('home')">
+      <span class="icon">📑</span>
+      <span>流水</span>
+    </button>
+    <button class="fab-btn" id="fabAddBtn" type="button" onclick="openRecordModal()">＋</button>
+    <button class="nav-btn" id="tabAccBtn" type="button" onclick="switchNav('acco
