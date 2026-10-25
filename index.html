@@ -61,12 +61,12 @@
 </head>
 <body>
 
-  <div id="statusNotice">介面已就緒，雲端服務連線中...</div>
+  <div id="statusNotice">正在啟動介面...</div>
 
   <div class="top-header">
     <h2 id="headerTitle">正在用的帳本</h2>
     <div id="authContainer">
-      <button class="login-btn-top" id="topLoginBtn" type="button" onclick="handleLoginClick()">點此登入 Google</button>
+      <button class="login-btn-top" id="topLoginBtn" type="button">點此登入 Google</button>
     </div>
   </div>
 
@@ -114,12 +114,12 @@
 
   <!-- 底部導覽列 -->
   <div class="bottom-nav">
-    <button class="nav-btn active" id="tabHomeBtn" type="button" onclick="switchNav('home')">
+    <button class="nav-btn active" id="tabHomeBtn" type="button">
       <span class="icon">📑</span>
       <span>流水</span>
     </button>
-    <button class="fab-btn" id="fabAddBtn" type="button" onclick="openRecordModal()">＋</button>
-    <button class="nav-btn" id="tabAccBtn" type="button" onclick="switchNav('accounts')">
+    <button class="fab-btn" id="fabAddBtn" type="button">＋</button>
+    <button class="nav-btn" id="tabAccBtn" type="button">
       <span class="icon">💳</span>
       <span>帳戶</span>
     </button>
@@ -131,4 +131,7 @@
       <h3 style="margin-bottom:15px;">記一筆帳</h3>
       <div class="form-group">
         <label>收支類型</label>
-        <select id="recType" clas
+        <select id="recType" class="form-control">
+          <option value="expense">支出 (-)</option>
+          <option value="income">收入 (+)</option>
+       
