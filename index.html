@@ -174,9 +174,17 @@
         <input type="number" id="recAmount" class="form-control" placeholder="0.00" inputmode="decimal">
       </div>
       <div class="form-group">
-        <label>存取帳戶 (子帳戶)</label>
-        <select id="recAccount" class="form-control"></select>
-      </div>
+  <label>主帳戶</label>
+  <select id="recMainAccount" class="form-control" onchange="onMainAccountChange()"></select>
+</div>
+<div class="form-group">
+  <label>主帳戶</label>
+  <select id="recMainAccount" class="form-control" onchange="onMainAccountChange()"></select>
+</div>
+<div class="form-group">
+  <label>子帳戶 / 信封</label>
+  <select id="recSubAccount" class="form-control"></select>
+</div>
       <div class="form-group">
         <label>備註說明</label>
         <input type="text" id="recNote" class="form-control" placeholder="例如：加油、健保費扣款">
