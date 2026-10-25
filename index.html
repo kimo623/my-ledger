@@ -14,10 +14,10 @@
       --income: #e53935;
       --border: #f0f0f0;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text-main); padding-bottom: 90px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text-main); padding-bottom: 100px; position: relative; }
 
-    .top-header { background: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .top-header { background: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
     .top-header h2 { font-size: 18px; font-weight: 600; }
     .user-pill { font-size: 12px; background: #e8f5e9; color: #2e7d32; padding: 5px 10px; border-radius: 20px; font-weight: bold; }
 
@@ -31,7 +31,7 @@
 
     .section-card { background: var(--card-bg); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .section-title { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-    .item-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .item-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
     .item-row:last-child { border-bottom: none; }
     .item-left { display: flex; align-items: center; gap: 12px; }
     .item-icon { width: 38px; height: 38px; border-radius: 10px; background: #fff3e0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
@@ -39,104 +39,97 @@
     .item-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     .item-badge { background: #ffebee; color: #c62828; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
 
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #fff; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 150; }
-    .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #888; flex: 1; cursor: pointer; }
+    /* 底部導航欄：拉高層級，允許觸控 */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: #fff; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 50; pointer-events: auto; }
+    .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #888; flex: 1; height: 100%; justify-content: center; cursor: pointer; }
     .nav-btn.active { color: var(--primary); font-weight: 600; }
     .nav-btn .icon { font-size: 20px; margin-bottom: 2px; }
-    .fab-btn { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #ff8a65, #f4511e); color: #fff; border: none; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(244,81,30,0.35); transform: translateY(-12px); cursor: pointer; }
+    
+    .fab-container { flex: 1; display: flex; justify-content: center; align-items: center; height: 100%; }
+    .fab-btn { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #ff8a65, #f4511e); color: #fff; border: none; font-size: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(244,81,30,0.35); transform: translateY(-14px); cursor: pointer; }
+    .fab-btn:active { transform: translateY(-12px) scale(0.95); }
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: none; align-items: flex-end; }
-    .modal-overlay.open { display: flex; }
+    /* 遮罩徹底防穿透：關閉時完全禁止接收滑鼠與觸控事件 */
+    .modal-overlay { 
+      position: fixed; 
+      top: 0; left: 0; right: 0; bottom: 0; 
+      background: rgba(0,0,0,0.45); 
+      z-index: 999; 
+      display: flex; 
+      align-items: flex-end; 
+      opacity: 0; 
+      visibility: hidden; 
+      pointer-events: none; 
+      transition: all 0.2s ease; 
+    }
+    .modal-overlay.open { 
+      opacity: 1; 
+      visibility: visible; 
+      pointer-events: auto; 
+    }
     .modal-sheet { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px 18px; max-height: 85vh; overflow-y: auto; }
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
     .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; background: #fafafa; }
     .btn-submit { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--primary); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
   </style>
-</head>
-<body>
 
-  <div class="top-header">
-    <h2 id="headerTitle">正在用的帳本</h2>
-    <span class="user-pill">本機離線模式</span>
-  </div>
+  <script>
+    var DEFAULT_ACCOUNTS = [
+      { id: 'cash', group: 'cash', name: '所有現金支出', balance: 0, subAccounts: ['現金日常', '未分類消費'] },
+      { id: 'post', group: 'bank', name: '郵局', balance: 0, subAccounts: ['郵局。晨晨', '郵局。屬於外送', '郵局。賺的收入', '郵局。阿暐', '郵局。健保費1652元', '郵局。暐~年金2658元', '郵局。君~年金2658元', '郵局。存款', '郵局。總'] },
+      { id: 'cathay', group: 'bank', name: '國泰', balance: 0, subAccounts: ['一般存款'] },
+      { id: 'taishin', group: 'bank', name: '台新', balance: 0, subAccounts: ['一般存款'] },
+      { id: 'jko_taishin', group: 'bank', name: '街利存 - 台新', balance: 0, subAccounts: ['日常消費存'] },
+      { id: 'ubot', group: 'bank', name: '聯邦銀行', balance: 0, subAccounts: ['一般存款'] }
+    ];
 
-  <!-- 1. 首頁：流水 -->
-  <div id="viewHome" class="view-container active">
-    <div class="stat-banner">
-      <div class="label">本月淨資產變動</div>
-      <div class="main-num" id="totalNetBalance">$0.00</div>
-      <div class="sub-row">
-        <span>總收入：<b id="monthlyIncome">$0</b></span>
-        <span>總支出：<b id="monthlyExpense">$0</b></span>
-      </div>
-    </div>
+    var userAccounts = DEFAULT_ACCOUNTS;
+    try {
+      var stored = localStorage.getItem('my_acc_v3');
+      if (stored) userAccounts = JSON.parse(stored);
+    } catch(e){}
 
-    <div class="section-card">
-      <div class="section-title">最新流水明細</div>
-      <div id="transactionList" style="color:#888; font-size:14px; text-align:center; padding:15px 0;">尚無紀錄，點下方 ＋ 即可記帳</div>
-    </div>
-  </div>
+    var userRecords = [];
+    try {
+      var storedRec = localStorage.getItem('my_rec_v3');
+      if (storedRec) userRecords = JSON.parse(storedRec);
+    } catch(e){}
 
-  <!-- 2. 帳戶：主子帳戶結構 -->
-  <div id="viewAccounts" class="view-container">
-    <div class="stat-banner" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #14532d;">
-      <div class="label">帳戶總資產</div>
-      <div class="main-num" id="accountTotalSum">$0.00</div>
-      <div style="font-size:12px; opacity:0.85;">包含現金及各銀行子帳戶合計</div>
-    </div>
+    var currentViewingGroup = null;
 
-    <div class="section-card">
-      <div class="section-title">
-        <span>現金帳戶</span>
-        <span id="cashGroupTotal">$0.00</span>
-      </div>
-      <div id="cashAccountList"></div>
-    </div>
+    function saveState() {
+      try {
+        localStorage.setItem('my_acc_v3', JSON.stringify(userAccounts));
+        localStorage.setItem('my_rec_v3', JSON.stringify(userRecords));
+      } catch(e){}
+    }
 
-    <div class="section-card">
-      <div class="section-title">
-        <span>儲蓄帳戶</span>
-        <span id="bankGroupTotal">$0.00</span>
-      </div>
-      <div id="bankAccountList"></div>
-    </div>
-  </div>
+    function switchNav(tab) {
+      var homeV = document.getElementById('viewHome');
+      var accV = document.getElementById('viewAccounts');
+      var homeB = document.getElementById('tabHomeBtn');
+      var accB = document.getElementById('tabAccBtn');
+      var title = document.getElementById('headerTitle');
 
-  <!-- 底部導覽列 -->
-  <div class="bottom-nav">
-    <button class="nav-btn active" id="tabHomeBtn" type="button">
-      <span class="icon">📑</span>
-      <span>流水</span>
-    </button>
-    <button class="fab-btn" id="fabAddBtn" type="button">＋</button>
-    <button class="nav-btn" id="tabAccBtn" type="button">
-      <span class="icon">💳</span>
-      <span>帳戶</span>
-    </button>
-  </div>
+      if (tab === 'home') {
+        homeV.classList.add('active');
+        accV.classList.remove('active');
+        homeB.classList.add('active');
+        accB.classList.remove('active');
+        title.innerText = "正在用的帳本";
+      } else {
+        accV.classList.add('active');
+        homeV.classList.remove('active');
+        accB.classList.add('active');
+        homeB.classList.remove('active');
+        title.innerText = "帳戶資產與分項";
+        renderAccountView();
+      }
+    }
 
-  <!-- 記帳彈窗 -->
-  <div class="modal-overlay" id="recordModal">
-    <div class="modal-sheet">
-      <h3 style="margin-bottom:15px;">記一筆帳</h3>
-      <div class="form-group">
-        <label>收支類型</label>
-        <select id="recType" class="form-control">
-          <option value="expense">支出 (-)</option>
-          <option value="income">收入 (+)</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>金額</label>
-        <input type="number" id="recAmount" class="form-control" placeholder="0.00" inputmode="decimal">
-      </div>
-      <div class="form-group">
-        <label>存取帳戶 (子帳戶)</label>
-        <select id="recAccount" class="form-control"></select>
-      </div>
-      <div class="form-group">
-        <label>備註說明</label>
-        <input type="text" id="recNote" class="form-control" placeholder="例如：加油、健保費扣款">
-      </div>
-      <button class="btn-submit" id="saveRecord
+    function openRecordModal() {
+      populateAccountSelect();
+      var el = document.getElementById('recordModal');
+      el.classList.add('open');
+ 
